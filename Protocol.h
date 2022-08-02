@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <vector>
 
 namespace protocol_onenet
@@ -11,10 +12,20 @@ namespace protocol_onenet
     };
 }
 
-namespace adapter_impl
+namespace protocol_v1
+{
+    struct TapControl
+    {
+        String cmd;
+        String hash;
+    };
+}
+
+namespace protocol_adapter_impl
 {
     using namespace std;
     using namespace protocol_onenet;
+    using namespace protocol_v1;
 
     template <typename T>
     vector<u8> protocolEncode(const ReportDataPoint3<T> &in)
@@ -32,21 +43,17 @@ namespace adapter_impl
         return buffer;
     }
 
-    template <typename T>
-    vector<u8> protocolDecode(const u8 *bufferIn, size_t length, ReportDataPoint3<T> &out)
-    {
-        return vector<u8>();
-    }
+    bool protocolDecode(const u8 *bufferIn, size_t length, TapControl &out);
 }
 
 template <typename T>
 bool protocolDecode(const u8 *bufferIn, size_t length, T &out)
 {
-    return adapter_impl::protocolDecode(bufferIn, length, out);
+    return protocol_adapter_impl::protocolDecode(bufferIn, length, out);
 }
 
 template <typename T>
 std::vector<u8> protocolEncode(const T &in)
 {
-    return adapter_impl::protocolEncode(in);
+    return protocol_adapter_impl::protocolEncode(in);
 }

@@ -17,6 +17,23 @@ void mountFS()
     LOG_I("mounted ret=%d", fsMountRet);
 }
 
+void setupPins()
+{
+    LOG_I("initializing PINs");
+    
+    vector<PinOutConfig> pinOutConfig;
+    loadOrSaveConfig("/config/pinout.config", pinOutConfig);
+
+    LOG_I("loaded %d pin configurations", pinOutConfig.size());
+    
+    for (const auto &cfg : pinOutConfig)
+    {
+        pinMode(cfg.pin, OUTPUT);
+    }
+
+    LOG_I("completed");
+}
+
 void setup()
 {
     Serial.begin(115200);

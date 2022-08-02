@@ -1,5 +1,11 @@
+#include <coredecls.h>
 #include "App.h"
 #include "AppConfig.h"
+#include "Logging.h"
+#include "Protocol.h"
+
+using namespace protocol_onenet;
+using namespace protocol_v1;
 
 constexpr char *MQTT_CONFIG_FILE = "/config/mqtt.json";
 constexpr char *TOPIC_CONFIG_FILE = "/config/topics.json";
@@ -66,14 +72,14 @@ void App::connectMQTT()
     m_pubSubClient.setCallback([=](const char *topic, u8 *payload, uint length)
                                { handleMessage(topic, payload, length, topics); });
 
-    String uid(ESP.getChipId(), HEX);
-    m_pubSubClient.connect(uid.c_str(), config.username.c_str(), config.password.c_str());
+    m_pubSubClient.connect(config.clientID.c_str(), config.username.c_str(), config.password.c_str());
 }
 
 void App::handleMessage(const char *topic, const u8 *payload, uint length, const TopicConfig &topics)
 {
     if (topics.action == topic)
     {
-        
+        TapControl tapControl;
+        protocolDecode(payload, length, tapControl);
     }
 }

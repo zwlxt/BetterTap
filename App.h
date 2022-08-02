@@ -2,10 +2,8 @@
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-#include <coredecls.h>
 #include "AppConfig.h"
 #include "State.h"
-#include "Logging.h"
 
 class App
 {
@@ -28,20 +26,3 @@ private:
     WiFiClientSecure m_wifiClient;
     PubSubClient m_pubSubClient;
 };
-
-template <typename T>
-static void loadOrSaveConfig(const char *path, T &config)
-{
-    LOG_I("loading config %s", path);
-    if (LittleFS.exists(path))
-    {
-        File file = LittleFS.open(path, "r");
-        loadConfig(file, config);
-    }
-    else
-    {
-        LOG_I("config file %s does not exist, creating", path);
-        File file = LittleFS.open(path, "w");
-        saveConfig(file, config);
-    }
-}
