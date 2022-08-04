@@ -18,12 +18,14 @@ namespace app_config_converter_impl
 
     void decodeConfig(JsonObjectConst document, PinOutConfig &config)
     {
+        config.id = document["id"];
         config.pin = document["pin"];
         config.en = document["en"];
     }
 
     void encodeConfig(JsonObject document, const PinOutConfig &config)
     {
+        document["id"] = config.id;
         document["pin"] = config.pin;
         document["en"] = config.en;
     }
@@ -70,11 +72,11 @@ namespace app_config_converter_impl
 
     void decodeConfig(JsonObjectConst document, TopicConfig &config)
     {
-        config.action = document["action"].as<String>();
+        config.legacyAction = document["legacyAction"].as<String>();
     }
 
     void encodeConfig(JsonObject document, const TopicConfig &config)
     {
-        document["action"] = config.action;
+        document["legacyAction"] = config.legacyAction;
     }
 }

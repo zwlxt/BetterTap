@@ -5,9 +5,25 @@ namespace protocol_adapter_impl
     bool protocolDecode(const u8 *bufferIn, size_t length, TapControl &out)
     {
         StaticJsonDocument<64> doc;
-        deserializeJson(doc, String((const char *)bufferIn));
+        DeserializationError e = deserializeJson(doc, (const char *)bufferIn);
 
-        out.cmd = doc["cmd"].as<String>();
-        out.hash = doc["hash"].as<String>();
+        if (e)
+        {
+            out.cmd = doc["cmd"].as<String>();
+            out.hash = doc["hash"].as<String>();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    void protocolEncode(const TapControlResponse &in, Print& out)
+    {
+        StaticJsonDocument<64> doc;
+        doc["response"] = in.response;
+        doc["hash"] = in.hash;
+
+        serializeJson(doc, out);
     }
 }

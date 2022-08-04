@@ -19,6 +19,12 @@ namespace protocol_v1
         String cmd;
         String hash;
     };
+
+    struct TapControlResponse
+    {
+        String response;
+        String hash;
+    };
 }
 
 namespace protocol_adapter_impl
@@ -27,23 +33,22 @@ namespace protocol_adapter_impl
     using namespace protocol_onenet;
     using namespace protocol_v1;
 
-    template <typename T>
-    vector<u8> protocolEncode(const ReportDataPoint3<T> &in)
-    {
-        vector<u8> buffer;
-        buffer.push_back(0x03);
-
-        vector<u8> dataBytes = protocolEncode(in.data);
-
-        buffer.push_back(highByte(dataBytes.size()));
-        buffer.push_back(lowByte(dataBytes.size()));
-
-        buffer.insert(end(buffer), begin(dataBytes), end(dataBytes));
-
-        return buffer;
-    }
-
     bool protocolDecode(const u8 *bufferIn, size_t length, TapControl &out);
+    void protocolEncode(const TapControlResponse &in, Print& out);
+
+    template <typename T>
+    void protocolEncode(const ReportDataPoint3<T> &in, Print &out)
+    {
+        out.write(0x03);
+        
+        String dataBytes;
+        protocolEncode(in.data, dataBytes);
+
+        out.write(highByte(dataBytes.length()));
+        out.write(lowByte(dataBytes.length()));
+
+        out.write(dataBytes.c_str(), dataBytes.length());
+    }
 }
 
 template <typename T>
@@ -53,7 +58,7 @@ bool protocolDecode(const u8 *bufferIn, size_t length, T &out)
 }
 
 template <typename T>
-std::vector<u8> protocolEncode(const T &in)
+void protocolEncode(const T &in, Print &out)
 {
-    return protocol_adapter_impl::protocolEncode(in);
+    protocol_adapter_impl::protocolEncode(in, out);
 }

@@ -1,8 +1,8 @@
+#include <vector>
 #include <coredecls.h>
 #include "App.h"
 #include "AppConfig.h"
 #include "Logging.h"
-#include "Protocol.h"
 
 using namespace protocol_onenet;
 using namespace protocol_v1;
@@ -10,6 +10,7 @@ using namespace protocol_v1;
 constexpr char *MQTT_CONFIG_FILE = "/config/mqtt.json";
 constexpr char *TOPIC_CONFIG_FILE = "/config/topics.json";
 constexpr char *TIME_CONFIG_FILE = "/config/time.json";
+constexpr char *PIN_OUT_CONFIG = "/config/pinout.config";
 
 void App::init()
 {
@@ -28,6 +29,23 @@ void App::loop()
     }
 }
 
+void App::setupActuators()
+{
+    LOG_I("initializing PINs");
+
+    std::vector<PinOutConfig> pinOutConfig;
+    loadOrSaveConfig(PIN_OUT_CONFIG, pinOutConfig);
+
+    LOG_I("loaded %d pin configurations", pinOutConfig.size());
+
+    for (auto cfg : pinOutConfig)
+    {
+        m_tapActuators.emplace(cfg.id, TapActuator {cfg});
+    }
+
+    LOG_I("completed");
+}
+
 void App::syncTime()
 {
     LOG_I("starting");
@@ -39,15 +57,15 @@ void App::syncTime()
     const char *ntpServer2 = config.ntpServer2.isEmpty() ? nullptr : config.ntpServer2.c_str();
     const char *ntpServer3 = config.ntpServer3.isEmpty() ? nullptr : config.ntpServer3.c_str();
 
-    settimeofday_cb([&](bool fromSNTP)
-                    {
+    settimeofday_cb([&](bool fromSNTP) {
         if (fromSNTP)
         {
             m_state.set(StateID::syncClockComplete);
             LOG_I("sync time success");
 
             connectMQTT();
-        } });
+        }
+    });
 
     configTime(config.tz, config.dst, ntpServer1, ntpServer2, ntpServer3);
 }
@@ -77,9 +95,28 @@ void App::connectMQTT()
 
 void App::handleMessage(const char *topic, const u8 *payload, uint length, const TopicConfig &topics)
 {
-    if (topics.action == topic)
+    if (topics.legacyAction == topic)
     {
         TapControl tapControl;
-        protocolDecode(payload, length, tapControl);
+        bool ret = protocolDecode(payload, length, tapControl);
+
+        bool actionRet = false;
+
+        if (ret)
+        {
+            constexpr u8 TAP_ID = 1;
+            if (m_tapActuators.count(TAP_ID) > 0)
+            {
+                auto tapActuator = m_tapActuators.find(TAP_ID);
+                if (tapActuator != std::end(m_tapActuators))
+                {
+                    tapActuator->second.setTapState(tapControl.cmd == "on");
+                }
+                actionRet = true;
+            }
+        }
+
+        TapControlResponse res{actionRet ? "ok" : "fail", tapControl.hash};
+        responseMessage(topic, res);
     }
 }

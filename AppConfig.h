@@ -14,6 +14,7 @@ struct WiFiConfig
 
 struct PinOutConfig
 {
+    u8 id;
     u8 pin;
     u8 en;
 };
@@ -43,7 +44,7 @@ struct TimeConfig
 
 struct TopicConfig
 {
-    String action;
+    String legacyAction;
 };
 
 namespace app_config_converter_impl
