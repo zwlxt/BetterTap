@@ -1,4 +1,5 @@
 #include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
 #include <LittleFS.h>
 #include "AppConfig.h"
 #include "Logging.h"

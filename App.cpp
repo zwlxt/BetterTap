@@ -1,16 +1,12 @@
 #include <vector>
 #include <coredecls.h>
+#include "Constants.h"
 #include "App.h"
 #include "AppConfig.h"
 #include "Logging.h"
 
 using namespace protocol_onenet;
 using namespace protocol_v1;
-
-constexpr char *MQTT_CONFIG_FILE = "/config/mqtt.json";
-constexpr char *TOPIC_CONFIG_FILE = "/config/topics.json";
-constexpr char *TIME_CONFIG_FILE = "/config/time.json";
-constexpr char *PIN_OUT_CONFIG = "/config/pinout.config";
 
 void App::init()
 {
