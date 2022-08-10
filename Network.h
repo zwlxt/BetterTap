@@ -9,6 +9,8 @@ public:
 
     void init();
     void updateState();
+    void onConnected(std::function<void(const WiFiEventStationModeGotIP &)> handler);
+    
 private:
     void prepareNetworkConfig();
     void stopNetworkConfig();
@@ -16,4 +18,5 @@ private:
 
     ESP8266WiFiMulti m_wifiMulti;
     WiFiEventHandler m_gotIPHandler;
+    std::function<void(const WiFiEventStationModeGotIP &)> m_onConnected;
 };

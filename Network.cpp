@@ -1,23 +1,29 @@
-#include "Constants.h"
 #include "Network.h"
 #include "AppConfig.h"
+#include "Constants.h"
 #include "StreamUtils.h"
 
 #define DEFAULT_AP_PSK "v5qCQ1sr"
 
 void NetworkManager::init()
 {
-    std::vector<WiFiConfig> wifiConfig;
-    loadOrSaveConfig(STA_CONFIG, wifiConfig);
+    LOG_I("loading config from %s", STA_CONFIG);
 
-    if (!wifiConfig.empty())
+    std::vector<WiFiConfig> wifiConfig;
+    loadOrSaveConfig_P(STA_CONFIG, wifiConfig);
+    
+    if (wifiConfig.empty())
     {
         prepareNetworkConfig();
     }
 
-    WiFi.mode(WIFI_STA);
-    m_gotIPHandler = WiFi.onStationModeGotIP([=](auto e)
-                                             { this->onGotIP(e); });
+    m_gotIPHandler = WiFi.onStationModeGotIP([=](auto e) {
+        if (m_onConnected)
+        {
+            m_onConnected(e);
+        }
+        this->onGotIP(e);
+    });
 
     m_wifiMulti.cleanAPlist();
 
@@ -35,6 +41,11 @@ void NetworkManager::updateState()
     }
 }
 
+void NetworkManager::onConnected(std::function<void(const WiFiEventStationModeGotIP &)> handler)
+{
+    this->m_onConnected = handler;
+}
+
 void NetworkManager::prepareNetworkConfig()
 {
     if (WiFi.getMode() != WIFI_AP_STA && WiFi.getMode() != WIFI_AP)
@@ -42,9 +53,17 @@ void NetworkManager::prepareNetworkConfig()
         WiFi.mode(WIFI_AP_STA);
 
         String ssid = String(PSTR("TAP2_")) + String(ESP.getChipId(), HEX);
-        LOG_I("starting AP: %d", ssid.c_str());
-        WiFi.softAP(ssid, DEFAULT_AP_PSK);
-        LOG_I("started AP");
+        LOG_I("starting AP: %s", ssid.c_str());
+        bool ret = WiFi.softAP(ssid, DEFAULT_AP_PSK, 6, false, 4);
+        LOG_I("started AP ret=%c", ret ? 'T' : 'F');
+
+        if (ret)
+        {
+            StringPrint ipBuffer;
+            WiFi.softAPIP().printTo(ipBuffer);
+            String ip = ipBuffer.str(); 
+            LOG_I("IP=%s", ip.c_str());
+        }
     }
 
     LOG_I("starting smart config");

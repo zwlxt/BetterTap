@@ -36,7 +36,7 @@ private:
         syncClockComplete = 0
     };
 
-    State<8> m_state;
+    State m_state;
 
     WiFiClientSecure m_wifiClient;
     PubSubClient m_pubSubClient;

@@ -4,18 +4,21 @@
 #include "AppConfig.h"
 #include "Logging.h"
 #include "App.h"
+#include "Network.h"
 
 using namespace std;
 
+NetworkManager networkManager;
 App app;
 
 void mountFS()
 {
-    LittleFS.setConfig(LittleFSConfig(true));
-
     LOG_I("mounting fs");
     bool fsMountRet = LittleFS.begin();
-    LOG_I("mounted ret=%d", fsMountRet);
+    LOG_I("mounted ret=%c", fsMountRet ? 'T' : 'F');
+
+    bool fsCheck = LittleFS.check();
+    LOG_I("fsCheck=%c", fsCheck ? 'T' : 'F');
 }
 
 void setup()
@@ -25,10 +28,17 @@ void setup()
 
     mountFS();
 
-    app.init();
+    networkManager.onConnected([&](auto &e)
+    {
+        app.init();
+    });
+
+    networkManager.init();
 }
 
 void loop()
 {
-    app.loop();
+    // app.loop();
+    LOG_I("a %d", 1);
+    delay(1000);
 }

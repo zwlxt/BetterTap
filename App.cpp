@@ -30,7 +30,7 @@ void App::setupActuators()
     LOG_I("initializing PINs");
 
     std::vector<PinOutConfig> pinOutConfig;
-    loadOrSaveConfig(PIN_OUT_CONFIG, pinOutConfig);
+    loadOrSaveConfig_P(PIN_OUT_CONFIG, pinOutConfig);
 
     LOG_I("loaded %d pin configurations", pinOutConfig.size());
 
@@ -47,7 +47,12 @@ void App::syncTime()
     LOG_I("starting");
 
     TimeConfig config;
-    loadOrSaveConfig(TIME_CONFIG_FILE, config);
+    loadOrSaveConfig_P(TIME_CONFIG_FILE, config);
+
+    if (config.ntpServer1.isEmpty())
+    {
+        LOG_E("ntpServer1 is empty");
+    }
 
     const char *ntpServer1 = config.ntpServer1.c_str();
     const char *ntpServer2 = config.ntpServer2.isEmpty() ? nullptr : config.ntpServer2.c_str();
@@ -71,7 +76,7 @@ void App::connectMQTT()
     LOG_I("initializing MQTT client");
 
     MQTTConfig config;
-    loadOrSaveConfig(MQTT_CONFIG_FILE, config);
+    loadOrSaveConfig_P(MQTT_CONFIG_FILE, config);
 
     if (m_pubSubClient.connected())
     {
@@ -79,7 +84,7 @@ void App::connectMQTT()
     }
 
     TopicConfig topics;
-    loadOrSaveConfig(TOPIC_CONFIG_FILE, topics);
+    loadOrSaveConfig_P(TOPIC_CONFIG_FILE, topics);
 
     m_pubSubClient.setClient(m_wifiClient);
     m_pubSubClient.setServer(config.host.c_str(), config.port);

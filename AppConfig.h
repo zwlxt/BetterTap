@@ -35,9 +35,9 @@ struct MQTTConfig
 
 struct TimeConfig
 {
-    int tz;
-    int dst;
-    String ntpServer1;
+    int tz = 8;
+    int dst = 0;
+    String ntpServer1 = "pool.ntp.org";
     String ntpServer2;
     String ntpServer3;
 };
@@ -117,18 +117,20 @@ void saveConfig(File &file, const std::vector<T> &config)
 }
 
 template <typename T>
-void loadOrSaveConfig(const char *path, T &config)
+void loadOrSaveConfig_P(const char *path_P, T &config)
 {
-    LOG_I("loading config %s", path);
+    String path(FPSTR(path_P));
     if (LittleFS.exists(path))
     {
+        LOG_I("loading config %s", path.c_str());
         File file = LittleFS.open(path, "r");
         loadConfig(file, config);
     }
     else
     {
-        LOG_I("config file %s does not exist, creating", path);
+        LOG_I("config file %s does not exist, creating", path.c_str());
         File file = LittleFS.open(path, "w");
         saveConfig(file, config);
     }
+    LOG_I("done");
 }

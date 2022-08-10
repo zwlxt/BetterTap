@@ -1,32 +1,32 @@
 #pragma once
 
-template <u8 SLOT_SIZE>
 class State
 {
+    using Inner = u8;
+
 public:
-    State()
-    {
-        for (u8 i = 0; i < SLOT_SIZE; ++i)
-        {
-            slots[i] = false;
-        }
-    }
+    State() : m_slots(0) {}
 
     void set(u8 slot)
     {
-        slots[slot] = true;
+        m_slots |= 1 << slot;
     }
 
     void unset(u8 slot)
     {
-        slots[slot] = false;
+        m_slots &= 0 << slot;
     }
 
     bool operator[](u8 slot) const
     {
-        return slots[slot];
+        return (m_slots >> slot) & 0x01;
+    }
+
+    size_t size() const
+    {
+        return sizeof(Inner);
     }
 
 private:
-    bool slots[SLOT_SIZE];
+    Inner m_slots;
 };
