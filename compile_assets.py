@@ -16,11 +16,10 @@ def read_file(asset_file):
     return result.stdout.decode("utf8")
 
 def generate_file(new_file, content):
-    var_name = "ASSET_" + PurePath(new_file).name.replace(".", "_").upper();
+    var_name = "ASSET_" + PurePath(new_file).name.replace(".", "_").upper()
 
     with open(f"{new_file}.h", "w+") as f:
-        content = content.replace("\\", "\\\\").replace("\"", "\\\"");
-        f.write(f"const char {var_name}[] PROGMEM = \"{content}\"\n;");
+        f.write(f"const char {var_name}[] PROGMEM = \"{content}\";\n")
 
         f.write(f"const unsigned long {var_name}_LEN = sizeof({var_name});\n")
 
@@ -29,6 +28,11 @@ for asset_file in asset_files:
     print(f"compiling {asset_file}")
 
     content = read_file(asset_file)
+
+    content = content \
+        .replace("./style.css", "/css/style.css") \
+        .replace("\\", "\\\\") \
+        .replace("\"", "\\\"")
 
     generate_file(asset_file, content)
 

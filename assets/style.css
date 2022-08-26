@@ -1,0 +1,10 @@
+.container {
+    text-align: center;
+}
+table {
+    margin: 0px auto;
+    text-align: left;
+}
+table thead {
+    font-weight: bold;
+}

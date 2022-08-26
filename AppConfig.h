@@ -69,12 +69,24 @@ namespace app_config_converter_impl
 }
 
 template <typename T>
+void decodeConfig(JsonObjectConst document, T &config)
+{
+    app_config_converter_impl::decodeConfig(document, config);
+}
+
+template <typename T>
+void encodeConfig(JsonObject document, const T &config)
+{
+    app_config_converter_impl::encodeConfig(document, config);
+}
+
+template <typename T>
 void loadConfig(File &file, T &config)
 {
     StaticJsonDocument<JSON_SIZE> document;
     DeserializationError ret = deserializeJson(document, file);
 
-    app_config_converter_impl::decodeConfig(document.as<JsonObjectConst>(), config);
+    decodeConfig(document.as<JsonObjectConst>(), config);
 }
 
 template <typename T>
@@ -82,7 +94,7 @@ void saveConfig(File &file, const T &config)
 {
     StaticJsonDocument<JSON_SIZE> document;
 
-    app_config_converter_impl::encodeConfig(document.to<JsonObject>(), config);
+    encodeConfig(document.to<JsonObject>(), config);
     serializeJsonPretty(document, file);
 }
 
@@ -97,7 +109,7 @@ void loadConfig(File &file, std::vector<T> &config)
     for (JsonObjectConst item : jsonArray)
     {
         T cfgItem;
-        app_config_converter_impl::decodeConfig(item, cfgItem);
+        decodeConfig(item, cfgItem);
         config.push_back(cfgItem);
     }
 }
@@ -110,7 +122,7 @@ void saveConfig(File &file, const std::vector<T> &config)
     for (size_t i = 0; i < config.size(); ++i)
     {
         const T &cfgItem = config[i];
-        app_config_converter_impl::encodeConfig(document[i], cfgItem);
+        encodeConfig(document[i], cfgItem);
     }
 
     serializeJson(document, file);
@@ -132,5 +144,15 @@ void loadOrSaveConfig_P(const char *path_P, T &config)
         File file = LittleFS.open(path, "w");
         saveConfig(file, config);
     }
+    LOG_I("done");
+}
+
+template <typename T>
+void saveConfig_P(const char *path_P, T &config)
+{
+    String path(FPSTR(path_P));
+    LOG_I("saving config file %s", path.c_str());
+    File file = LittleFS.open(path, "w+");
+    saveConfig(file, config);
     LOG_I("done");
 }

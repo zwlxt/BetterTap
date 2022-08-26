@@ -13,9 +13,6 @@ NetworkManager networkManager;
 Dashboard dashboard;
 App app;
 
-const char *TEMPLATE PROGMEM = "test(%s)";
-const char *INNER PROGMEM = "inner";
-
 void mountFS()
 {
     LOG_I("mounting fs");
@@ -32,10 +29,6 @@ void setup()
     LOG_I("initializing");
 
     mountFS();
-
-    char out[20];
-    sprintf_P(out, TEMPLATE, INNER);
-    Serial.println(out);
 
     networkManager.onConnected([&](auto &e) { app.init(); });
     networkManager.init();

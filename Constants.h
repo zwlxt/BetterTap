@@ -7,3 +7,7 @@ const char MQTT_CONFIG_FILE[] PROGMEM = "/config/mqtt.json";
 const char TOPIC_CONFIG_FILE[] PROGMEM = "/config/topics.json";
 const char TIME_CONFIG_FILE[] PROGMEM = "/config/time.json";
 const char PIN_OUT_CONFIG[] PROGMEM = "/config/pinout.config";
+
+const char MIME_HTML[] = "text/html";
+const char MIME_CSS[] = "text/css";
+const char MIME_JSON[] = "application/json";

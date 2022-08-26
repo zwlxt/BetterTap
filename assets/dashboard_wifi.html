@@ -11,15 +11,19 @@
 
 <body>
     <div class="container">
-        <h1>Better Tap</h1>
+        <h1>WiFi</h1>
         <p>
-            <a href="/dashboard/wifi">WiFi</a>
-            <a href="/dashboard/mqtt">Server</a>
+            <form action="/dashboard/wifi/add" method="post">
+                SSID:<input type="text" name="ssid">
+                Password:<input type="password" name="password">
+                <button>Add</button>
+            </form>
         </p>
         <table border="2">
             <thead>
-                <td>Key</td>
-                <td>Value</td>
+                <td>Connected</td>
+                <td>SSID</td>
+                <td>Edit</td>
             </thead>
             <tbody>
                 {{CFG_ITEMS}}
