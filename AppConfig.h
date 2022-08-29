@@ -49,33 +49,33 @@ struct TopicConfig
 
 namespace app_config_converter_impl
 {
-    void decodeConfig(JsonObjectConst document, WiFiConfig &config);
-    void encodeConfig(JsonObject document, const WiFiConfig &config);
+    void decodeConfig(JsonVariantConst document, WiFiConfig &config);
+    void encodeConfig(JsonVariant document, const WiFiConfig &config);
 
-    void decodeConfig(JsonObjectConst document, PinOutConfig &config);
-    void encodeConfig(JsonObject document, const PinOutConfig &config);
+    void decodeConfig(JsonVariantConst document, PinOutConfig &config);
+    void encodeConfig(JsonVariant document, const PinOutConfig &config);
 
-    void decodeConfig(JsonObjectConst document, WebServerConfig &config);
-    void encodeConfig(JsonObject document, const WebServerConfig &config);
+    void decodeConfig(JsonVariantConst document, WebServerConfig &config);
+    void encodeConfig(JsonVariant document, const WebServerConfig &config);
 
-    void decodeConfig(JsonObjectConst document, MQTTConfig &config);
-    void encodeConfig(JsonObject document, const MQTTConfig &config);
+    void decodeConfig(JsonVariantConst document, MQTTConfig &config);
+    void encodeConfig(JsonVariant document, const MQTTConfig &config);
 
-    void decodeConfig(JsonObjectConst document, TimeConfig &config);
-    void encodeConfig(JsonObject document, const TimeConfig &config);
+    void decodeConfig(JsonVariantConst document, TimeConfig &config);
+    void encodeConfig(JsonVariant document, const TimeConfig &config);
 
-    void decodeConfig(JsonObjectConst document, TopicConfig &config);
-    void encodeConfig(JsonObject document, const TopicConfig &config);
+    void decodeConfig(JsonVariantConst document, TopicConfig &config);
+    void encodeConfig(JsonVariant document, const TopicConfig &config);
 }
 
 template <typename T>
-void decodeConfig(JsonObjectConst document, T &config)
+void decodeConfig(JsonVariantConst document, T &config)
 {
     app_config_converter_impl::decodeConfig(document, config);
 }
 
 template <typename T>
-void encodeConfig(JsonObject document, const T &config)
+void encodeConfig(JsonVariant document, const T &config)
 {
     app_config_converter_impl::encodeConfig(document, config);
 }
@@ -86,15 +86,15 @@ void loadConfig(File &file, T &config)
     StaticJsonDocument<JSON_SIZE> document;
     DeserializationError ret = deserializeJson(document, file);
 
-    decodeConfig(document.as<JsonObjectConst>(), config);
+    decodeConfig(document.as<JsonVariantConst>(), config);
 }
 
 template <typename T>
 void saveConfig(File &file, const T &config)
 {
     StaticJsonDocument<JSON_SIZE> document;
-
-    encodeConfig(document.to<JsonObject>(), config);
+    
+    encodeConfig(document.as<JsonObject>(), config);
     serializeJsonPretty(document, file);
 }
 
@@ -106,7 +106,7 @@ void loadConfig(File &file, std::vector<T> &config)
 
     JsonArrayConst jsonArray = document.as<JsonArrayConst>();
 
-    for (JsonObjectConst item : jsonArray)
+    for (JsonVariantConst item : jsonArray)
     {
         T cfgItem;
         decodeConfig(item, cfgItem);
@@ -118,11 +118,13 @@ template <typename T>
 void saveConfig(File &file, const std::vector<T> &config)
 {
     StaticJsonDocument<JSON_SIZE> document;
+    JsonArray array = document.to<JsonArray>();
 
     for (size_t i = 0; i < config.size(); ++i)
     {
         const T &cfgItem = config[i];
-        encodeConfig(document[i], cfgItem);
+        JsonObject obj = array.createNestedObject();
+        encodeConfig(obj, cfgItem);
     }
 
     serializeJson(document, file);

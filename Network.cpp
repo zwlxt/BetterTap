@@ -29,6 +29,7 @@ void NetworkManager::init()
 
     for (const auto &cfg : wifiConfig)
     {
+        LOG_I("adding AP: %s, psk:%s", cfg.ssid.c_str(), cfg.password.isEmpty() ? "" : "*");
         m_wifiMulti.addAP(cfg.ssid.c_str(), cfg.password.c_str());
     }
 }

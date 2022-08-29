@@ -1,6 +1,7 @@
 #include "Dashboard.h"
 #include "Assets.h"
 #include "Logging.h"
+#include <uri/UriRegex.h>
 
 void Dashboard::init()
 {
@@ -61,6 +62,8 @@ void Dashboard::init()
     });
 
     m_webServer.on("/cfg/wifi/add", [=] {
+        LOG_D("args: %s", m_webServer.arg("plain").c_str());
+
         if (m_webServer.hasArg(F("ssid")))
         {
             String ssid = m_webServer.arg(F("ssid"));
@@ -74,6 +77,7 @@ void Dashboard::init()
             std::vector<WiFiConfig> config;
             loadOrSaveConfig_P(STA_CONFIG, config);
             config.emplace_back(WiFiConfig{ssid, password});
+            LOG_D("sizeof cfg %d", config.size());
             saveConfig_P(STA_CONFIG, config);
         }
 
@@ -100,8 +104,18 @@ void Dashboard::init()
         m_webServer.send(200);
     });
 
-    m_webServer.on("/dashboard/mqtt", [=] {
-        m_webServer.send(200, MIME_HTML, ASSET_DASHBOARD_SERVER_HTML, ASSET_DASHBOARD_SERVER_HTML_LEN);
+    m_webServer.on("/dashboard/server", [=] {
+        MQTTConfig config;
+        loadOrSaveConfig_P(MQTT_CONFIG_FILE, config);
+
+        String html(FPSTR(ASSET_DASHBOARD_SERVER_HTML));
+        html.replace(F("{{HOST}}"), config.host);
+        html.replace(F("{{PORT}}"), String(config.port));
+        html.replace(F("{{CLIENT_ID}}"), config.clientID);
+        html.replace(F("{{USERNAME}}"), config.username);
+        html.replace(F("{{PASSWORD}}"), config.password);
+        
+        m_webServer.send(200, MIME_HTML, html);
     });
 
     m_webServer.on("/cfg/mqtt", [=] {
@@ -120,6 +134,30 @@ void Dashboard::init()
         }
 
         m_webServer.send(200);
+    });
+
+
+    m_webServer.on(UriRegex("/dbg/fs/(.+)"), [=] {
+        String filePath = m_webServer.pathArg(0);
+
+        if (!filePath.isEmpty())
+        {
+            filePath = "/" + filePath;
+
+            LOG_I("filePath=%s", filePath.c_str());
+
+            if (LittleFS.exists(filePath))
+            {
+                File file = LittleFS.open(filePath, "r");
+                if (file.isFile())
+                {
+                    m_webServer.streamFile(file, "text/plain");
+                    return;
+                }
+            }
+        }
+
+        m_webServer.send(404);
     });
 
     m_webServer.addHook([=](const String &method, const String &url, WiFiClient *client,
