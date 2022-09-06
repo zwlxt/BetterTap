@@ -11,3 +11,8 @@ const char PIN_OUT_CONFIG[] PROGMEM = "/config/pinout.config";
 const char MIME_HTML[] PROGMEM = "text/html";
 const char MIME_CSS[] PROGMEM = "text/css";
 const char MIME_JSON[] PROGMEM = "application/json";
+
+enum AppState {
+    WIFI_CONFIG_UPDATED = 0,
+    MQTT_CONFIG_UPDATED = 1,
+};

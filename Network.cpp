@@ -32,11 +32,13 @@ void NetworkManager::init()
         LOG_I("adding AP: %s, psk:%s", cfg.ssid.c_str(), cfg.password.isEmpty() ? "" : "*");
         m_wifiMulti.addAP(cfg.ssid.c_str(), cfg.password.c_str());
     }
+
+    m_wifiMulti.run();
 }
 
-void NetworkManager::updateState()
+void NetworkManager::loop()
 {
-    if (m_wifiMulti.run(5000) != WL_CONNECTED)
+    if (!WiFi.isConnected())
     {
         prepareNetworkConfig();
     }
@@ -65,15 +67,16 @@ void NetworkManager::prepareNetworkConfig()
             String ip = ipBuffer.str(); 
             LOG_I("IP=%s", ip.c_str());
         }
-    }
 
-    LOG_I("starting smart config");
-    WiFi.beginSmartConfig();
+        LOG_I("starting smart config");
+        WiFi.beginSmartConfig();
+    }
 }
 
 void NetworkManager::stopNetworkConfig()
 {
     LOG_I("switching to STA mode");
+    WiFi.softAPdisconnect();
     WiFi.mode(WIFI_STA);
 
     LOG_I("stopping smart config");

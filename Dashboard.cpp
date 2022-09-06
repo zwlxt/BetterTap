@@ -1,6 +1,7 @@
 #include "Dashboard.h"
 #include "Assets.h"
 #include "Logging.h"
+#include "Constants.h"
 #include <uri/UriRegex.h>
 
 void Dashboard::init()
@@ -79,6 +80,8 @@ void Dashboard::init()
             config.emplace_back(WiFiConfig{ssid, password});
             LOG_D("sizeof cfg %d", config.size());
             saveConfig_P(STA_CONFIG, config);
+
+            m_updateSTAConfigHandler(config);
         }
 
         m_webServer.send(200);
@@ -99,6 +102,8 @@ void Dashboard::init()
             }
 
             saveConfig_P(STA_CONFIG, config);
+
+            m_updateSTAConfigHandler(config);
         }
 
         m_webServer.send(200);
@@ -131,6 +136,8 @@ void Dashboard::init()
             config.password = m_webServer.arg("password");
 
             saveConfig_P(MQTT_CONFIG_FILE, config);
+
+            m_updateMQTTConfigHandler(config);
         }
 
         m_webServer.send(200);

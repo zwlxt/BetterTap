@@ -1,6 +1,7 @@
 #pragma once
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
+#include "State.h"
 
 class NetworkManager
 {
@@ -8,7 +9,7 @@ public:
     NetworkManager() {}
 
     void init();
-    void updateState();
+    void loop();
     void onConnected(std::function<void(const WiFiEventStationModeGotIP &)> handler);
     
 private:

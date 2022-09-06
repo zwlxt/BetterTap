@@ -33,11 +33,22 @@ void setup()
     networkManager.onConnected([&](auto &e) { app.init(); });
     networkManager.init();
 
+    dashboard.onUpdateConfig([](const std::vector<WiFiConfig> &config) {
+        LOG_I("updated STA config event");
+        networkManager.init();
+    });
+
+    dashboard.onUpdateConfig([](const MQTTConfig &config) {
+        LOG_I("updated MQTT config event");
+    });
+
     dashboard.init();
 }
 
 void loop()
 {
+    networkManager.loop();
     app.loop();
     dashboard.loop();
+    yield();
 }
