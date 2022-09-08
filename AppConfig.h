@@ -31,6 +31,7 @@ struct MQTTConfig
     String clientID;
     String username;
     String password;
+    String initTopic;
 };
 
 struct TimeConfig

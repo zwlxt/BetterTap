@@ -40,6 +40,7 @@ void setup()
 
     dashboard.onUpdateConfig([](const MQTTConfig &config) {
         LOG_I("updated MQTT config event");
+        app.connectMQTT();
     });
 
     dashboard.init();

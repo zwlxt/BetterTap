@@ -14,12 +14,13 @@ class App
 public:
     void init();
     void loop();
+    void connectMQTT();
 
 private:
     void setupActuators();
     void syncTime();
-    void connectMQTT();
-    void handleMessage(const char *topic, const u8 *payload, uint length, const TopicConfig &topics);
+    void handleInitMessage(const u8 *payload, uint length);
+    void handleMessage(const char *topic, const u8 *payload, uint length);
 
     template <typename T>
     void responseMessage(const char *topic, const T &payload, bool retain = false)
@@ -40,6 +41,7 @@ private:
 
     WiFiClientSecure m_wifiClient;
     PubSubClient m_pubSubClient;
+    TopicConfig  m_topics;
 
     std::map<u8, TapActuator> m_tapActuators;
 };

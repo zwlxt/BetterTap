@@ -1,9 +1,9 @@
-#include <vector>
-#include <coredecls.h>
-#include "Constants.h"
 #include "App.h"
 #include "AppConfig.h"
+#include "Constants.h"
 #include "Logging.h"
+#include <coredecls.h>
+#include <vector>
 
 using namespace protocol_onenet;
 using namespace protocol_v1;
@@ -36,7 +36,7 @@ void App::setupActuators()
 
     for (auto cfg : pinOutConfig)
     {
-        m_tapActuators.emplace(cfg.id, TapActuator {cfg});
+        m_tapActuators.emplace(cfg.id, TapActuator{cfg});
     }
 
     LOG_I("completed");
@@ -83,20 +83,39 @@ void App::connectMQTT()
         m_pubSubClient.disconnect();
     }
 
-    TopicConfig topics;
-    loadOrSaveConfig_P(TOPIC_CONFIG_FILE, topics);
-
     m_pubSubClient.setClient(m_wifiClient);
     m_pubSubClient.setServer(config.host.c_str(), config.port);
-    m_pubSubClient.setCallback([=](const char *topic, u8 *payload, uint length)
-                               { handleMessage(topic, payload, length, topics); });
+    m_pubSubClient.setCallback([=](const char *topic, u8 *payload, uint length) {
+        if (config.initTopic == topic)
+        {
+            handleInitMessage(payload, length);
+        }
+        else
+        {
+            handleMessage(topic, payload, length);
+        }
+    });
+
+    bool ret = m_pubSubClient.subscribe(config.initTopic.c_str(), 1);
+    LOG_I("init subscription ret=%d", ret);
 
     m_pubSubClient.connect(config.clientID.c_str(), config.username.c_str(), config.password.c_str());
 }
 
-void App::handleMessage(const char *topic, const u8 *payload, uint length, const TopicConfig &topics)
+void App::handleInitMessage(const u8 *payload, uint length)
 {
-    if (topics.legacyAction == topic)
+    bool ret = protocolDecode(payload, length, m_topics);
+    if (!ret)
+    {
+        LOG_E("invalid init message");
+    }
+
+    m_pubSubClient.subscribe(m_topics.legacyAction.c_str(), 1);
+}
+
+void App::handleMessage(const char *topic, const u8 *payload, uint length)
+{
+    if (m_topics.legacyAction == topic)
     {
         TapControl tapControl;
         bool ret = protocolDecode(payload, length, tapControl);
