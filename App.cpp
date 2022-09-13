@@ -90,6 +90,10 @@ void App::connectMQTT()
         {
             handleInitMessage(payload, length);
         }
+        else if (config.v1Topic)
+        {
+            handleV1Message(config.v1Topic.c_str(), payload, length);
+        }
         else
         {
             handleMessage(topic, payload, length);
@@ -109,34 +113,33 @@ void App::handleInitMessage(const u8 *payload, uint length)
     {
         LOG_E("invalid init message");
     }
-
-    m_pubSubClient.subscribe(m_topics.legacyAction.c_str(), 1);
 }
 
 void App::handleMessage(const char *topic, const u8 *payload, uint length)
 {
-    if (m_topics.legacyAction == topic)
+}
+
+void App::handleV1Message(const char *topic, const u8 *payload, uint length)
+{
+    TapControl tapControl;
+    bool ret = protocolDecode(payload, length, tapControl);
+
+    bool actionRet = false;
+
+    if (ret)
     {
-        TapControl tapControl;
-        bool ret = protocolDecode(payload, length, tapControl);
-
-        bool actionRet = false;
-
-        if (ret)
+        constexpr u8 TAP_ID = 1;
+        if (m_tapActuators.count(TAP_ID) > 0)
         {
-            constexpr u8 TAP_ID = 1;
-            if (m_tapActuators.count(TAP_ID) > 0)
+            auto tapActuator = m_tapActuators.find(TAP_ID);
+            if (tapActuator != std::end(m_tapActuators))
             {
-                auto tapActuator = m_tapActuators.find(TAP_ID);
-                if (tapActuator != std::end(m_tapActuators))
-                {
-                    tapActuator->second.setTapState(tapControl.cmd == "on");
-                }
-                actionRet = true;
+                tapActuator->second.setTapState(tapControl.cmd == "on");
             }
+            actionRet = true;
         }
-
-        TapControlResponse res{actionRet ? "ok" : "fail", tapControl.hash};
-        responseMessage(topic, res);
     }
+
+    TapControlResponse res{actionRet ? "ok" : "fail", tapControl.hash};
+    responseMessage(topic, res);
 }

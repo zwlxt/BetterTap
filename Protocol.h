@@ -27,11 +27,33 @@ namespace protocol_v1
     };
 }
 
+namespace protocol_v2
+{
+    struct Command
+    {
+        String code;
+    };
+
+    template <typename T>
+    struct Response
+    {
+        String code;
+        T data;
+    };
+
+    struct TopicConfig
+    {
+    };
+}
+
 namespace protocol_adapter_impl
 {
     using namespace std;
     using namespace protocol_onenet;
     using namespace protocol_v1;
+    using namespace protocol_v2;
+
+    bool protocolDecode(const u8 *bufferIn, size_t length, TopicConfig &out);
 
     bool protocolDecode(const u8 *bufferIn, size_t length, TapControl &out);
     void protocolEncode(const TapControlResponse &in, Print& out);

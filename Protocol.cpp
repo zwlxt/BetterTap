@@ -26,4 +26,9 @@ namespace protocol_adapter_impl
 
         serializeJson(doc, out);
     }
+
+    bool protocolDecode(const u8 *bufferIn, size_t length, TopicConfig &out)
+    {
+        
+    }
 }

@@ -75,14 +75,4 @@ namespace app_config_converter_impl
         document["ntp2"] = config.ntpServer2;
         document["ntp3"] = config.ntpServer3;
     }
-
-    void decodeConfig(JsonVariantConst document, TopicConfig &config)
-    {
-        config.legacyAction = document["legacyAction"].as<String>();
-    }
-
-    void encodeConfig(JsonVariant document, const TopicConfig &config)
-    {
-        document["legacyAction"] = config.legacyAction;
-    }
 }

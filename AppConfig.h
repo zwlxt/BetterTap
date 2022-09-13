@@ -32,6 +32,7 @@ struct MQTTConfig
     String username;
     String password;
     String initTopic;
+    String v1Topic;
 };
 
 struct TimeConfig
@@ -41,11 +42,6 @@ struct TimeConfig
     String ntpServer1 = "pool.ntp.org";
     String ntpServer2;
     String ntpServer3;
-};
-
-struct TopicConfig
-{
-    String legacyAction;
 };
 
 namespace app_config_converter_impl
@@ -64,9 +60,6 @@ namespace app_config_converter_impl
 
     void decodeConfig(JsonVariantConst document, TimeConfig &config);
     void encodeConfig(JsonVariant document, const TimeConfig &config);
-
-    void decodeConfig(JsonVariantConst document, TopicConfig &config);
-    void encodeConfig(JsonVariant document, const TopicConfig &config);
 }
 
 template <typename T>
