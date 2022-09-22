@@ -20,7 +20,6 @@ void Dashboard::init()
                    [=] { m_webServer.send_P(200, MIME_HTML, ASSET_DASHBOARD_HTML, ASSET_DASHBOARD_HTML_LEN); });
 
     m_webServer.on("/css/style.css", [=] {
-        m_webServer.sendHeader(F("Cache-Control"), F("max-age=3600"));
         m_webServer.send_P(200, MIME_CSS, ASSET_STYLE_CSS, ASSET_STYLE_CSS_LEN);
     });
 
@@ -143,9 +142,9 @@ void Dashboard::init()
         m_webServer.send(200);
     });
 
-
-    m_webServer.on(UriRegex("/dbg/fs/(.+)"), [=] {
-        String filePath = m_webServer.pathArg(0);
+    m_webServer.on(UriRegex("/dbg/fs/(get|rm)/(.+)"), [=] {
+        String action = m_webServer.pathArg(0);
+        String filePath = m_webServer.pathArg(1);
 
         if (!filePath.isEmpty())
         {
@@ -155,10 +154,19 @@ void Dashboard::init()
 
             if (LittleFS.exists(filePath))
             {
-                File file = LittleFS.open(filePath, "r");
-                if (file.isFile())
+                if (action == "get")
                 {
-                    m_webServer.streamFile(file, "text/plain");
+                    File file = LittleFS.open(filePath, "r");
+                    if (file.isFile())
+                    {
+                        m_webServer.streamFile(file, "text/plain");
+                        return;
+                    }
+                }
+                else if (action == "rm")
+                {
+                    LittleFS.remove(filePath);
+                    m_webServer.send(200);
                     return;
                 }
             }

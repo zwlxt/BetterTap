@@ -15,9 +15,16 @@ public:
 private:
     void prepareNetworkConfig();
     void stopNetworkConfig();
-    void onGotIP(const WiFiEventStationModeGotIP &e);
+    void handleOnGotIP(const WiFiEventStationModeGotIP &e);
+    void handleOnSTADisconnect(const WiFiEventStationModeDisconnected &e);
+
+    enum NetworkState
+    {
+        CONFIGURING_WIFI = 1,
+    };
 
     ESP8266WiFiMulti m_wifiMulti;
     WiFiEventHandler m_gotIPHandler;
     std::function<void(const WiFiEventStationModeGotIP &)> m_onConnected;
+    State m_state;
 };

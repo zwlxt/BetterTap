@@ -35,10 +35,12 @@ private:
 
     enum StateID
     {
-        syncClockComplete = 0
+        SYNC_CLOCK_COMPLETE = 0
     };
 
     State m_state;
+    TimeConfig m_timeConfig;
+    MQTTConfig m_mqttConfig;
 
     WiFiClientSecure m_wifiClient;
     PubSubClient m_pubSubClient;

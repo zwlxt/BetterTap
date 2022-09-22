@@ -11,7 +11,7 @@ void NetworkManager::init()
 
     std::vector<WiFiConfig> wifiConfig;
     loadOrSaveConfig_P(STA_CONFIG, wifiConfig);
-    
+
     if (wifiConfig.empty())
     {
         prepareNetworkConfig();
@@ -22,7 +22,11 @@ void NetworkManager::init()
         {
             m_onConnected(e);
         }
-        this->onGotIP(e);
+        this->handleOnGotIP(e);
+    });
+
+    WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected &) {
+        
     });
 
     m_wifiMulti.cleanAPlist();
@@ -38,7 +42,7 @@ void NetworkManager::init()
 
 void NetworkManager::loop()
 {
-    if (!WiFi.isConnected())
+    if (!WiFi.isConnected() && m_state[CONFIGURING_WIFI])
     {
         prepareNetworkConfig();
     }
@@ -64,12 +68,14 @@ void NetworkManager::prepareNetworkConfig()
         {
             StringPrint ipBuffer;
             WiFi.softAPIP().printTo(ipBuffer);
-            String ip = ipBuffer.str(); 
+            String ip = ipBuffer.str();
             LOG_I("IP=%s", ip.c_str());
         }
 
         LOG_I("starting smart config");
         WiFi.beginSmartConfig();
+
+        m_state.set(CONFIGURING_WIFI);
     }
 }
 
@@ -81,9 +87,11 @@ void NetworkManager::stopNetworkConfig()
 
     LOG_I("stopping smart config");
     WiFi.stopSmartConfig();
+
+    m_state.unset(CONFIGURING_WIFI);
 }
 
-void NetworkManager::onGotIP(const WiFiEventStationModeGotIP &e)
+void NetworkManager::handleOnGotIP(const WiFiEventStationModeGotIP &e)
 {
     StringPrint ipEvent;
     ipEvent.print("IP:");
