@@ -1,6 +1,10 @@
 #pragma once
 #include <Arduino.h>
 
+#ifndef NDEBUG
+#define BT_DEBUG
+#endif
+
 const char STA_CONFIG[] PROGMEM = "/config/wifi_sta.json";
 const char AP_CONFIG[] PROGMEM = "/config/wifi_ap.json";
 const char MQTT_CONFIG_FILE[] PROGMEM = "/config/mqtt.json";
@@ -12,7 +16,5 @@ const char MIME_HTML[] PROGMEM = "text/html";
 const char MIME_CSS[] PROGMEM = "text/css";
 const char MIME_JSON[] PROGMEM = "application/json";
 
-enum AppState {
-    WIFI_CONFIG_UPDATED = 0,
-    MQTT_CONFIG_UPDATED = 1,
-};
+constexpr u8 V1_PIN = 4;
+

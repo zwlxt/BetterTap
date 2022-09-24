@@ -5,9 +5,9 @@
 class TapActuator
 {
 public:
-    TapActuator(PinOutConfig pinout) : m_pinout{LED_BUILTIN, 1}
+    TapActuator(PinOutConfig pinout) : m_pinout{pinout}
     {
-        pinMode(pinout.pin, OUTPUT);
+        pinMode(m_pinout.pin, OUTPUT);
     }
 
     void setTapState(bool open);

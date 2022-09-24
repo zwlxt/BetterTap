@@ -118,6 +118,8 @@ void Dashboard::init()
         html.replace(F("{{CLIENT_ID}}"), config.clientID);
         html.replace(F("{{USERNAME}}"), config.username);
         html.replace(F("{{PASSWORD}}"), config.password);
+        html.replace(F("{{INIT_TOPIC}}"), config.initTopic);
+        html.replace(F("{{V1_TOPIC}}"), config.v1Topic);
         
         m_webServer.send(200, MIME_HTML, html);
     });
@@ -133,6 +135,8 @@ void Dashboard::init()
             config.clientID = m_webServer.arg("clientID");
             config.username = m_webServer.arg("username");
             config.password = m_webServer.arg("password");
+            config.initTopic = m_webServer.arg("initTopic");
+            config.v1Topic = m_webServer.arg("v1Topic");
 
             saveConfig_P(MQTT_CONFIG_FILE, config);
 

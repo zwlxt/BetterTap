@@ -14,7 +14,6 @@ struct WiFiConfig
 
 struct PinOutConfig
 {
-    u8 id;
     u8 pin;
     u8 en;
 };
@@ -37,7 +36,7 @@ struct MQTTConfig
 
 struct TimeConfig
 {
-    int tz = 8;
+    int tz = 8 * 3600;
     int dst = 0;
     String ntpServer1 = "pool.ntp.org";
     String ntpServer2;

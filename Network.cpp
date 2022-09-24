@@ -1,7 +1,7 @@
 #include "Network.h"
 #include "AppConfig.h"
 #include "Constants.h"
-#include "StreamUtils.h"
+#include "Utils.h"
 
 #define DEFAULT_AP_PSK "v5qCQ1sr"
 
@@ -18,11 +18,12 @@ void NetworkManager::init()
     }
 
     m_gotIPHandler = WiFi.onStationModeGotIP([=](auto e) {
+        this->handleOnGotIP(e);
+        
         if (m_onConnected)
         {
             m_onConnected(e);
         }
-        this->handleOnGotIP(e);
     });
 
     WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected &) {
@@ -66,10 +67,9 @@ void NetworkManager::prepareNetworkConfig()
 
         if (ret)
         {
-            StringPrint ipBuffer;
-            WiFi.softAPIP().printTo(ipBuffer);
-            String ip = ipBuffer.str();
-            LOG_I("IP=%s", ip.c_str());
+            BytePrint ipBuffer;
+            ipBuffer.print(WiFi.softAPIP());
+            LOG_I("IP=%s", ipBuffer.to_str());
         }
 
         LOG_I("starting smart config");
@@ -93,15 +93,14 @@ void NetworkManager::stopNetworkConfig()
 
 void NetworkManager::handleOnGotIP(const WiFiEventStationModeGotIP &e)
 {
-    StringPrint ipEvent;
+    BytePrint ipEvent;
     ipEvent.print("IP:");
     ipEvent.print(e.ip);
     ipEvent.print(" GW:");
     ipEvent.print(e.gw);
     ipEvent.print(" MASK:");
     ipEvent.print(e.mask);
-    String ipEventDesc = ipEvent.str();
 
-    LOG_I("got IP address: %s", ipEventDesc.c_str());
+    LOG_I("got IP address: %s", ipEvent.to_str());
     stopNetworkConfig();
 }

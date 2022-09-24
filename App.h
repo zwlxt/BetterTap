@@ -2,16 +2,18 @@
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-#include <StreamUtils.h>
 #include <map>
 #include "AppConfig.h"
 #include "State.h"
 #include "Actuator.h"
 #include "Protocol.h"
+#include "Utils.h"
 
 class App
 {
 public:
+    App() : m_pubSubClient{m_wifiClient}, m_lastMQTTConnection{0} {}
+    
     void init();
     void loop();
     void connectMQTT();
@@ -24,13 +26,12 @@ private:
     void handleV1Message(const char* topic, const u8 *payload, uint length);
 
     template <typename T>
-    void responseMessage(const char *topic, const T &payload, bool retain = false)
+    void publishMessage(const char *topic, const T &payload, bool retain = false)
     {
-        StringPrint out;
+        BytePrint out;
         protocolEncode(payload, out);
 
-        String str = out.str();
-        m_pubSubClient.publish(topic, str.c_str(), str.length());
+        m_pubSubClient.publish(topic, out.data(), out.size());
     }
 
     enum StateID
@@ -42,9 +43,11 @@ private:
     TimeConfig m_timeConfig;
     MQTTConfig m_mqttConfig;
 
-    WiFiClientSecure m_wifiClient;
+    WiFiClient m_wifiClient;
     PubSubClient m_pubSubClient;
     protocol_v2::TopicConfig m_topics;
+
+    unsigned long m_lastMQTTConnection;
 
     std::map<u8, TapActuator> m_tapActuators;
 };

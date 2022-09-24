@@ -17,10 +17,10 @@ void mountFS()
 {
     LOG_I("mounting fs");
     bool fsMountRet = LittleFS.begin();
-    LOG_I("mounted ret=%c", fsMountRet ? 'T' : 'F');
+    LOG_I("mounted ret=%d", fsMountRet);
 
     bool fsCheck = LittleFS.check();
-    LOG_I("fsCheck=%c", fsCheck ? 'T' : 'F');
+    LOG_I("fsCheck=%d", fsCheck);
 }
 
 void setup()

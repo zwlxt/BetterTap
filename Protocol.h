@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <vector>
+#include "Utils.h"
+#include "Logging.h"
 
 namespace protocol_onenet
 {
@@ -24,6 +26,11 @@ namespace protocol_v1
     {
         String response;
         String hash;
+    };
+
+    struct DPPowerState
+    {
+        u8 power;
     };
 }
 
@@ -61,16 +68,20 @@ namespace protocol_adapter_impl
     template <typename T>
     void protocolEncode(const ReportDataPoint3<T> &in, Print &out)
     {
-        out.write(0x03);
-        
-        String dataBytes;
+        out.write((u8)0x03);
+
+        BytePrint dataBytes;
         protocolEncode(in.data, dataBytes);
 
-        out.write(highByte(dataBytes.length()));
-        out.write(lowByte(dataBytes.length()));
+        u16 len = (u16) dataBytes.size() & 0xFFFF;
 
-        out.write(dataBytes.c_str(), dataBytes.length());
+        out.write(highByte(len));
+        out.write(lowByte(len));
+
+        out.write(dataBytes.data(), len);
     }
+
+    void protocolEncode(const DPPowerState &in, Print& out);
 }
 
 template <typename T>
